@@ -1,4 +1,5 @@
 _ = require 'lodash'
+async = require 'async'
 request = require 'request'
 
 class GooglePlaces
@@ -17,10 +18,11 @@ class GooglePlaces
 
     request.get options, (error, response, body) =>
       return callback error if error?
-      return @getDetails(_.first(body.results).place_id, callback)
+      async.mapSeries _.map(body.results, 'place_id'), @getDetails, callback
 
 
   getDetails: (id, callback) =>
+    console.log 'yo'
     options =
       url: 'https://maps.googleapis.com/maps/api/place/details/json'
       qs:
@@ -28,7 +30,8 @@ class GooglePlaces
         key: @key
       json: true
 
-    request.get options, (error, response, body) => callback error, body
+    request.get options, (error, response, body) =>      
+      callback error, body
 
 
 
